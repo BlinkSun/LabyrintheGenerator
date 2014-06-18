@@ -1,0 +1,132 @@
+''''''''''''''''''''''''''
+' Perfect Maze Generator '
+'          Icey          '
+'        Oct 2006        '
+'      Public Domain     '
+''''''''''''''''''''''''''
+
+' this code is designed to be run from a module, using sub main
+
+' all variables are declared
+Option Explicit
+' 0 is the most random, randomisation gets lower after that
+' less randomisation means more straight corridors
+Private Const RANDOMISATION As Integer = 5
+' the spaces across - this must be an odd number
+Private Const MAZE_X As Integer = 53
+' the spaces down - this must be an odd number
+Private Const MAZE_Y As Integer = 17
+' used for storing the current square and squares potentially to move to
+Private Type COORDS
+    X As Integer
+    Y As Integer
+End Type
+' stores the directions that corridors go in
+Dim cDir(3) As COORDS
+' these can be any odd numbers
+Dim blnMaze(MAZE_X, MAZE_Y) As Boolean
+ 
+Private Sub GenerateMaze()
+    Dim cN As COORDS, cS As COORDS
+    Dim intDir As Integer, intDone As Integer
+    Dim blnBlocked As Boolean
+    Randomize
+    Erase blnMaze
+    Do
+        ' this code is used to make sure the numbers are odd
+        cS.X = 2 + (Int(((MAZE_X - 1) * Rnd) / 2) * 2)
+        cS.Y = 2 + (Int(((MAZE_Y - 1) * Rnd) / 2) * 2)
+        ' first one is free!
+        If intDone = 0 Then blnMaze(cS.X, cS.Y) = True
+        If blnMaze(cS.X, cS.Y) Then
+            ' always randomisation directions to start
+            RandomDirections
+            Do
+                ' only randomisation directions, based on the constant
+                If Int(RANDOMISATION * Rnd) = 0 Then RandomDirections
+                blnBlocked = True
+                ' loop through order of directions
+                For intDir = 0 To 3
+                    ' work out where this direction is
+                    cN.X = cS.X + (cDir(intDir).X * 2)
+                    cN.Y = cS.Y + (cDir(intDir).Y * 2)
+                    ' check if the tile can be used
+                    If IsFree(cN) Then
+                        ' create a path
+                        blnMaze(cN.X, cN.Y) = True
+                        ' and the square inbetween
+                        blnMaze(cS.X + cDir(intDir).X, cS.Y + cDir(intDir).Y) = True
+                        ' this is now the current square
+                        cS.X = cN.X
+                        cS.Y = cN.Y
+                        blnBlocked = False
+                        ' increment paths created
+                        intDone = intDone + 1
+                        Exit For
+                    End If
+                Next
+            ' loop until a path was created
+            Loop Until blnBlocked
+        End If
+    ' create enough paths to fill the whole grid
+    Loop While intDone + 1 < ((MAZE_X - 1) * (MAZE_Y - 1)) / 4
+End Sub
+ 
+' this changes the direction to go from the current square, to the next available
+Private Sub RandomDirections()
+    ' clear the array
+    Erase cDir
+    ' four possible sets of directions
+    Select Case Int(3 * Rnd)
+        Case 0
+            cDir(0).X = -1: cDir(1).X = 1
+            cDir(2).Y = -1: cDir(3).Y = 1
+        Case 1
+            cDir(3).X = -1: cDir(2).X = 1
+            cDir(1).Y = -1: cDir(0).Y = 1
+        Case 2
+            cDir(2).X = -1: cDir(3).X = 1
+            cDir(0).Y = -1: cDir(1).Y = 1
+        Case 3
+            cDir(1).X = -1: cDir(0).X = 1
+            cDir(3).Y = -1: cDir(2).Y = 1
+    End Select
+End Sub
+ 
+' checks if a tile is free for use
+Private Function IsFree(cF As COORDS) As Boolean
+    ' check it's within the grid
+    If cF.X < MAZE_X And cF.X > 1 And cF.Y < MAZE_Y And cF.Y > 1 Then
+        ' check it hasn't been used yet
+        IsFree = (blnMaze(cF.X, cF.Y) = False)
+    End If
+End Function
+ 
+' this code should be run from a module
+' go to Project > [projectname] Properties
+' and then select Sub Main from the Startup Object list
+Sub Main()
+    ' the maze is added to this string, which is then copied to the clipboard
+    Dim strOutput As String
+    GenerateMaze
+    Dim A As Integer, B As Integer
+    ' loop through squares
+    For A = 1 To MAZE_Y
+        For B = 1 To MAZE_X
+            ' check if a path was created here
+            If blnMaze(B, A) Then
+                ' empty
+                strOutput = strOutput & " "
+            Else
+                ' wall
+                strOutput = strOutput & "#"
+            End If
+        Next
+        ' go down to the next row
+        strOutput = strOutput & vbNewLine
+    Next
+    Clipboard.Clear
+    Clipboard.SetText strOutput
+    ' tell the user what has happened
+    MsgBox "Maze copied to the clipboard.", vbInformation, "Maze generator"
+End Sub
