@@ -15,17 +15,14 @@ class Maze implements Plugin {
 	private $RANDOMISATION;
 	private $MAZE_X;
 	private $MAZE_Y;
-
-  class COORDS { 
-      var $X; 
-      var $Y; 
-  }
+  	class COORDS { 
+      		var $X; 
+      		var $Y; 
+  	}
 
 	public function __construct(ServerAPI $api, $server = false) {
 		$this->api = $api;
 		$this->RANDOMISATION = 0;
-		$this->MAZE_X = 25;
-		$this->MAZE_Y = 25;
 	}
 
 
@@ -39,8 +36,8 @@ class Maze implements Plugin {
 	public function commandHandle($cmd, $params, $issuer, $alias){
 		switch($cmd){
 			case 'maze':
-				if(isset($params[0])) {
-					$output = $this->GenMaze();
+				if(isset($params[0]) or isset($params[1])) {
+					$output = $this->GenMaze($params[0],$params[1]);
 				}else{
 					$output = "Usage: /$cmd [X] [Y]\n";
 				}
@@ -49,8 +46,12 @@ class Maze implements Plugin {
 		return $output;
 	}
 
-	public function GenMaze() {
-	  return "Done!";
+	public function GenMaze($MAZE_X, $MAZE_Y) {
+		
+		
+		
+		
+	  	return "Done!";
 	}
 
 	public function __destruct() {
