@@ -30,22 +30,19 @@ function RandomDirections() {
 	return $cDir;
 }
 
-function GenerateMaze() {
-	$MAZE_X = 15;
-	$MAZE_Y = 15;
+function GenerateMaze($MAZE_X, $MAZE_Y) {
+
 	$cN = array('X' => NULL, 'Y' => NULL);
 	$cS = array('X' => NULL, 'Y' => NULL);
 	$intDir = 0;
 	$intDone = 0;
 	$blnBlocked = False;
-	$cDir = array_fill(0, 4, array('X' => 0, 'Y' => 0));
-	$blnMaze = array_fill(0, $MAZE_X, array_fill(0, $MAZE_Y, False));
-	//echo "Let start it !<br>";
+	$cDir = array();
+	$blnMaze = array_fill(1, $MAZE_X, array_fill(1, $MAZE_Y, False));
+	
 	Do {
-		//echo "Loop #" . $intDone . "<br>";
-		$cS['X'] = round(rand(0, $MAZE_X - 1) / 2) * 2;
-		$cS['Y'] = round(rand(0, $MAZE_Y - 1) / 2) * 2;
-		//echo "checking blnMaze(" . $cS['X'] . "," . $cS['Y'] . ")...<br>";
+		$cS['X'] = round(rand(1, $MAZE_X - 1) / 2) * 2;
+		$cS['Y'] = round(rand(1, $MAZE_Y - 1) / 2) * 2;
 		if($intDone == 0) {
 			$blnMaze[$cS['X']][$cS['Y']] = True;
 		}
@@ -58,7 +55,6 @@ function GenerateMaze() {
 					$cN['Y'] = $cS['Y'] + ($cDir[$intDir]['Y'] * 2);
 					if($cN['X'] < $MAZE_X and $cN['X'] > 1 and $cN['Y'] < $MAZE_Y and $cN['Y'] > 1) {
 						if($blnMaze[$cN['X']][$cN['Y']] == False) {
-							//echo "blnMaze(" . $cN['X'] . "," . $cN['Y'] . ") = True<br>";
 							$blnMaze[$cN['X']][$cN['Y']] = True;
 							$blnMaze[$cS['X'] + $cDir[$intDir]['X']][$cS['Y'] + $cDir[$intDir]['Y']] = True;
 							$cS['X'] = $cN['X'];
@@ -72,14 +68,16 @@ function GenerateMaze() {
 			} while ($blnBlocked == False);
 		}
 	} while ($intDone + 1 < (($MAZE_X - 1) * ($MAZE_Y - 1)) / 4);
+	$blnMaze[1][2] = True;			//Start hole
+	$blnMaze[$MAZE_X][$MAZE_Y - 1] = True;	//Exit hole
 	echoMaze($blnMaze, $MAZE_X, $MAZE_Y);
 	return $blnMaze;
 }
 
 function echoMaze($rmaze, $xmax, $ymax) {
 	$output = "<pre>";
-	For($y = 0; $y <= $ymax - 1; $y++) {
-		For($x = 0; $x <= $xmax - 1; $x++) {
+	For($y = 1; $y <= $ymax; $y++) {
+		For($x = 1; $x <= $xmax; $x++) {
 			If($rmaze[$x][$y] == True) {
 				$output = $output . "&nbsp;";
 			} Else {
@@ -91,5 +89,5 @@ function echoMaze($rmaze, $xmax, $ymax) {
 	echo $output . "</pre>";
 }
 
-GenerateMaze();
+GenerateMaze(47, 25);
 ?>
