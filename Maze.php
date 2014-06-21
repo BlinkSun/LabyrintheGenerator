@@ -12,14 +12,13 @@ apiversion=11,12
 
 class Maze implements Plugin {
 	private $api;
-  	}
 
 	public function __construct(ServerAPI $api, $server = false) {
 		$this->api = $api;
 	}
 
 	public function init() {
-		$this->config = new Config($this->api->plugin->configPath($this)."config.yml", CONFIG_YAML, array("wallblock"=>"18","wallheight"=>"3"));
+		$this->cmaze = new Config($this->api->plugin->configPath($this)."config.yml", CONFIG_YAML, array("wallblock"=>"18","wallheight"=>"3"));
 		$this->api->console->register('maze', "[X] [Y] Generate a maze (must be odd numbers).",array($this, 'commandHandle'));
 		$this->api->console->alias("mz", "maze");
 	}
@@ -29,12 +28,12 @@ class Maze implements Plugin {
 			case 'maze':
 				if(isset($params[0]) or isset($params[1])) {
 					if($params[0]%2 == false or $params[1]%2 == false) {
-						$output = "[MAZE]Usage: /$cmd [X] [Y] (must be odd numbers)\n";
+						$output = "[MAZE] Usage: /$cmd [X] [Y] (must be odd numbers)\n";
 					}else{
-						$this->GenerateMaze($params[0],$params[1]);
+						$this->GenerateMaze($params[0],$params[1],$issuer);
 					}
 				}else{
-					$output = "[MAZE]Usage: /$cmd [X] [Y] (must be odd numbers)\n";
+					$output = "[MAZE] Usage: /$cmd [X] [Y] (must be odd numbers)\n";
 				}
 			break;
 		}
@@ -72,7 +71,7 @@ class Maze implements Plugin {
 		return $cDir;
 	}
 
-	public function GenerateMaze($MAZE_X, $MAZE_Y) {
+	public function GenerateMaze($MAZE_X, $MAZE_Y, $player) {
 
 		$intDir = 0;
 		$intDone = 0;
@@ -110,26 +109,27 @@ class Maze implements Plugin {
 				} while ($blnBlocked == False);
 			}
 		} while ($intDone + 1 < (($MAZE_X - 1) * ($MAZE_Y - 1)) / 4);
-		$blnMaze[1][2] = True;					//Start
+		$blnMaze[1][2] = True;			//Start
 		$blnMaze[$MAZE_X][$MAZE_Y - 1] = True;	//Exit
-		$this->BuildMaze($blnMaze, $MAZE_X, $MAZE_Y);
+		$this->BuildMaze($blnMaze, $MAZE_X, $MAZE_Y, $player);
 	}
 
-	private function BuildMaze($rmaze, $xmax, $ymax) {
-		/*$output = "<pre>";
-		For($y = 1; $y <= $ymax; $y++) {
+	private function BuildMaze($rmaze, $xmax, $ymax, $player) {
+		For($z = 1; $z <= $ymax; $z++) {
 			For($x = 1; $x <= $xmax; $x++) {
-				If($rmaze[$x][$y] == True) {
-					$output = $output . "&nbsp;";
-				} Else {
-					$output = $output . "#";
+				For($y = 0; $y <= $this->cmaze->get("wallheight") - 1; $y++) {
+					$maze_pos = new Vector3($player->entity->x + $x, $player->entity->y + $y, $player->entity->z + $z);
+					If($rmaze[$x][$z] == True) {
+						$player->level->setBlock($maze_pos, BlockAPI::get(AIR));
+					} Else {
+						$player->level->setBlock($maze_pos, BlockAPI::get($this->cmaze->get("wallblock")));
+					}
 				}
 			}
-			$output = $output . "<br>";
 		}
-		echo $output . "</pre>";*/
 	}
 
 	public function __destruct() {
 	}
 }
+?>
