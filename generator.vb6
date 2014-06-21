@@ -1,9 +1,11 @@
+' VBSource
+' http://www.roguebasin.com/index.php?title=Simple_maze#Maze_Generator_in_Visual_Basic_6
+
 ''''''''''''''''''''''''''
 ' Perfect Maze Generator '
 '          Icey          '
 '        Oct 2006        '
 '      Public Domain     '
-'http://www.roguebasin.com/index.php?title=Simple_maze#Maze_Generator_in_Visual_Basic_6
 ''''''''''''''''''''''''''
 
 ' this code is designed to be run from a module, using sub main
