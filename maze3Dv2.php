@@ -1,0 +1,67 @@
+<?php
+
+$maze_N = 1;
+$maze_S = 2;
+$maze_E = 4;
+$maze_W = 8;
+$maze_U = 16;
+$maze_D = 32;
+$maze_list = array(1, 2, 4, 8, 16, 32);
+$maze_dx = array(1 => 0, 2 => 0, 4 => 1, 8 => -1, 16 => 0, 32 => 0);
+$maze_dy = array(1 => -1, 2 => 1, 4 => 0, 8 => 0, 16 => 0, 32 => 0);
+$maze_dz = array(1 => 0, 2 => 0, 4 => 0, 8 => 0, 16 => 1, 32 => -1);
+$maze_opposite = array(1 => 2, 2 => 1, 4 => 8, 8 => 4, 16 => 32, 32 => 16);
+
+function MazeGenerator($width, $height, $depth) {
+	global $maze_dx, $maze_dx, $maze_dx, $maze_opposite;
+	//var carved, cell, cells, dir, index, nx, ny, nz, x, y, z, _i, _len, _ref;
+	$maze_grid = array_fill(0, $depth, array_fill(0, $width, array_fill(0, $height, 0)));
+	$maze_cells = array([ 'x' => rand(0, $width - 1), 'y' => rand(0, $height - 1), 'z' => rand(0, $depth - 1) ]);
+
+	while(count($maze_cells) > 0) {
+		$index = rand(0, 1) === 0 ? rand(0, count($maze_cells) - 1) : count($maze_cells) - 1;
+		$maze_cell = $maze_cells[$index];
+		$carved = false;
+		$_ref = randomDirections();
+		for($_i = 0, $_len = count($_ref); $_i < $_len; $_i++) {
+			$dir = $_ref[$_i];
+			$nx = $maze_cell['x'] + $maze_dx[$dir];
+			$ny = $maze_cell['y'] + $maze_dy[$dir];
+			$nz = $maze_cell['z'] + $maze_dz[$dir];
+
+			if($nx >= 0 and $ny >= 0 and $nz >= 0 and $nx < $width and $ny < $height and $nz < $depth and $maze_grid[$nz][$ny][$nx] === 0) {
+				$maze_grid[$maze_cell['z']][$maze_cell['y']][$maze_cell['x']] |= $dir;
+				$maze_grid[$nz][$ny][$nx] |= $maze_opposite[$dir];
+				array_push($maze_cells, array([ 'x' => $nx, 'y' => $ny, 'z' => $nz ]));
+				$carved = true;
+				break;
+			}
+		}
+		if(!$carved) {
+			array_splice($maze_cells, $index, 1);
+		}
+	}
+	$maze_grid[0][0][0] |= 8;
+	$maze_grid[$depth - 1][$height - 1][$width - 1] |= 4;
+	
+	return $maze_grid;
+}
+
+function RandomDirections() {
+	global $maze_list;
+	//var i, j, list, _ref;
+	$list = array_slice($maze_list, 0);
+	$i = count($list) - 1;
+	while ($i > 0) {
+		$j = rand(0, $i);
+		$_ref = array($list[$j], $list[$i]);
+		$list[$i] = $_ref[0];
+		$list[$j] = $_ref[1];
+		$i--;
+	}
+	return $list;
+}
+
+echo "<pre>";
+var_dump(MazeGenerator(5, 5, 2));
+echo "</pre>";
